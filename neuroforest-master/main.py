@@ -9,6 +9,7 @@ import scipy
 from PIL import ImageDraw, ImageOps, ImageFilter, ImageFont
 from PIL.Image import Image
 from PIL.ImageEnhance import Contrast
+from adfluo.exceptions import ExtractionError
 from adfluo import Extractor, F, Input, Feat, SampleProcessor, param, DatasetAggregator, Agg
 from adfluo.dataset import SubsetLoader
 from adfluo.processors import DSFeat
@@ -19,6 +20,7 @@ from scipy.spatial import ConvexHull
 from neuroforest.dataset import DATA_FOLDER, SESSION_TYPES, Coordinates, TimeStampedCoordinates, NeuroForestSession, \
     dataloader
 
+ZERO = 1e-10
 
 ### Custom Storage
 
@@ -251,10 +253,11 @@ class Heatmap(DatasetAggregator):
         max_coord_x = int(all_mushroom_coords[0][:, 0].max())
         max_coord_z = int(all_mushroom_coords[0][:, 1].max())
         img_size = (max_coord_x, max_coord_z)
-        overlayed_trajectories = np.zeros(img_size, dtype=int).T
+        overlayed_trajectories = np.zeros(img_size, dtype=int).T + ZERO
         for player_data in all_players_coords:
             overlayed_trajectories += self.get_trajectory_array(player_data, img_size)
         log_scaled = np.log(overlayed_trajectories)
+        log_scaled[log_scaled == log_scaled.min()] = 0
         normed = (log_scaled / log_scaled.max()) * 255
         img = PIL.Image.fromarray(normed.astype(np.uint8))
         img = img.filter(ImageFilter.GaussianBlur(radius=10))
@@ -370,18 +373,21 @@ for session_type in SESSION_TYPES:
         >> Feat(f"{session_type}/performance")
     )
 
+    # Player distance
     extractor.add_extraction(
         Input(session_type)
         >> F(lambda session: distance(session.player_coords[0]["coord"], session.player_coords[-1]["coord"]))
         >> Feat(f"{session_type}/player_distance")
     )
 
+    # Distance to gathered mushrooms
     extractor.add_extraction(
         Input(session_type)
         >> F(lambda session: distance(session.gathered_mushrooms[0]["coord"], session.gathered_mushrooms[-1]["coord"]))
         >> Feat(f"{session_type}/gathered_mushrooms_distance")
     )
 
+    # Player trajectory
     extractor.add_extraction(
         Input(session_type)
         >> F(lambda session: consecutive_deltas(to_coords(session.player_coords)))
@@ -389,6 +395,7 @@ for session_type in SESSION_TYPES:
         >> Feat(f"{session_type}/player_trajectory")
     )
 
+    # Gathered mushrooms trajectory
     extractor.add_extraction(
         Input(session_type)
         >> F(lambda session: consecutive_deltas(to_coords(session.gathered_mushrooms)))
@@ -396,6 +403,7 @@ for session_type in SESSION_TYPES:
         >> Feat(f"{session_type}/gathered_mushrooms_trajectory")
     )
 
+    # Gathered mushrooms deltas
     extractor.add_extraction(
         Input(session_type)
         >> F(lambda session: consecutive_deltas(to_coords(session.gathered_mushrooms)))
@@ -404,6 +412,7 @@ for session_type in SESSION_TYPES:
         drop_on_save=True
     )
 
+    # Convex hull of player trajectory
     extractor.add_extraction(
         Input(session_type)
         >> F(lambda session: to_vect(to_coords(session.player_coords)))
@@ -413,6 +422,8 @@ for session_type in SESSION_TYPES:
     )
 
     # TODO: 2D projection of hull?
+
+    # Convex hull of gathered mushrooms
     extractor.add_extraction(
         Input(session_type)
         >> F(lambda session: to_vect(to_coords(session.gathered_mushrooms)))
@@ -421,6 +432,7 @@ for session_type in SESSION_TYPES:
         >> Feat(f"{session_type}/gathered_mushrooms_convex_hull")
     )
 
+    # First mushroom in view
     extractor.add_extraction(
         Input(session_type)
         >> F(first_mushroom_in_view)
@@ -431,6 +443,7 @@ for session_type in SESSION_TYPES:
         drop_on_save=True
     )
 
+    # Capture ratio
     extractor.add_extraction(
         Input(session_type)
         >> (
@@ -442,6 +455,7 @@ for session_type in SESSION_TYPES:
         >> Feat(f"{session_type}/capture_ratio")
     )
 
+    # Exploration images
     extractor.add_extraction(
         Input(session_type)
         >> CoordinatesTransform()
@@ -449,6 +463,7 @@ for session_type in SESSION_TYPES:
         >> Feat(f"{session_type}/exploration_img"),
     )
 
+    # Fractal frequencies
     extractor.add_extraction(
         Input(session_type)
         >> CoordinatesTransform()
@@ -457,6 +472,7 @@ for session_type in SESSION_TYPES:
         >> Feat(f"{session_type}/fractal_frequencies")
     )
 
+    # Heatmap
     extractor.add_extraction(
         Input(session_type)
         >> CoordinatesTransform()
@@ -464,12 +480,14 @@ for session_type in SESSION_TYPES:
         >> DSFeat(f"{session_type}/heatmap")
     )
 
+    # Overlay heatmap and trajectory
     extractor.add_extraction(
         (DSFeat(f"{session_type}/heatmap") | Feat(f"{session_type}/exploration_img"))
         >> F(overlay_trajectory)
         >> Feat(f"{session_type}/overlay", storage=exploration_storage)
     )
 
+    # Summary image
     extractor.add_extraction(
         (
                 Feat(f"{session_type}/fractal_frequencies") >> F(plot_fractal_transform)
@@ -481,6 +499,7 @@ for session_type in SESSION_TYPES:
         >> Feat(f"{session_type}/summary_img")
     )
 
+# Summary image
 extractor.add_extraction(
     (
             (Feat("first/summary_img") | Feat("uniform/summary_img") | Feat("patchy/summary_img"))
@@ -495,5 +514,11 @@ extractor.add_extraction(
 if __name__ == '__main__':
     extractor.extraction_DAG.prune_features(
         keep_only=["sample_summary"])
-    #dataloader = SubsetLoader(dataloader, ["Tristan"])
-    extractor.extract_to_dict(dataloader, extraction_order="sample")
+    subjects = [session.subject_name for session in dataloader]
+    subjects.remove("Estelle")
+    print(f"Studying subjects {subjects}")
+    try :
+        loader = SubsetLoader(dataloader, subjects)
+        extractor.extract_to_dict(loader, extraction_order="sample")
+    except ExtractionError as e :
+        print(f"Error extracting data for subject {subjects} : \n{e}")
