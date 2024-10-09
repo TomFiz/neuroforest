@@ -5,6 +5,14 @@ from csv import DictReader
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, TypedDict, List, Set, Any, Union, Iterable
+import matplotlib.pyplot as plt
+
+import sys
+sys.path.append('C:/Users/TomFi/Desktop/Cours/Projet IA/neuroforest-master')
+
+def transform(coords, offset, factor) :
+    return (np.array([coord.to_vect() for coord in coords]) + offset) * factor
+
 
 from adfluo import Sample, DatasetLoader
 
@@ -61,7 +69,7 @@ class NeuroForestSession:
                 total_time: int,):
         
         self.player_coords = player_coords
-        self.player_coords.sort(key=lambda e: e["timestamp"])
+        # self.player_coords.sort(key=lambda e: e["timestamp"])
         self.gathered_mushrooms = gathered_mushrooms.sort(key=lambda e: e["timestamp"])
         self.mushroom_coords = mushroom_coords
         self.mushroom_in_view = mushroom_in_view
