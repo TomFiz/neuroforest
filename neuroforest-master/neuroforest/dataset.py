@@ -87,14 +87,12 @@ class NeuroForestSample(Sample):
         return self.subject_name
 
     def load_session(self, session_type: SessionType) -> NeuroForestSession:
-        # print(f"Loading session {session_type} for {self.subject_name}")
         filepath = self.root_folder / f"{self.subject_name}_{session_type}0.json"
         if not os.path.exists(filepath):
             pass
         else :
             with filepath.open() as json_file:
                 json_content = json.load(json_file)
-                # print(json_content["Positions"] is None)
                 return NeuroForestSession(
                     mushroom_coords=[Coordinates(**e)
                                     for e in json_content['PositionsChampis']],
