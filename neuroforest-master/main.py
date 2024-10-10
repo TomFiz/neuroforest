@@ -1,6 +1,7 @@
 from io import BytesIO
 from itertools import chain
 from typing import Any, Iterable, List, Set, Tuple, TypeVar
+import json
 
 import PIL
 import matplotlib.pyplot as plt
@@ -512,13 +513,33 @@ extractor.add_extraction(
 )
 
 if __name__ == '__main__':
+
+    session_types = ["uniform","patchy"]
+    features = ["asrs"]
+    for session_type in session_types:
+        features = features + [f"{session_type}/performance",
+                    f"{session_type}/player_distance",
+                    f"{session_type}/gathered_mushrooms_distance",
+                    f"{session_type}/player_trajectory",
+                    f"{session_type}/gathered_mushrooms_trajectory",
+                    f"{session_type}/gathered_mushrooms_deltas",
+                    f"{session_type}/player_convex_hull",
+                    f"{session_type}/gathered_mushrooms_convex_hull",
+                    f"{session_type}/first_seen_mushroom_delta",
+                    f"{session_type}/capture_ratio",
+                    f"{session_type}/fracal_frequencies"]
+    
     extractor.extraction_DAG.prune_features(
-        keep_only=["sample_summary"])
+        keep_only=features)
     subjects = [session.subject_name for session in dataloader]
     subjects.remove("Estelle")
-    print(f"Studying subjects {subjects}")
+    # print(f"Studying subjects {subjects}")
+
     try :
         loader = SubsetLoader(dataloader, subjects)
-        extractor.extract_to_dict(loader, extraction_order="sample")
+        extracted_features = extractor.extract_to_dict(loader, extraction_order="sample")
+        with open(f'{DATA_FOLDER}/trajectory_features.json', 'w') as json_file:
+            json.dump(extracted_features, json_file, indent=4)
+
     except ExtractionError as e :
         print(f"Error extracting data for subject {subjects} : \n{e}")
