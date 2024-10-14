@@ -9,11 +9,6 @@ import matplotlib.pyplot as plt
 
 import sys
 sys.path.append('C:/Users/TomFi/Desktop/Cours/Projet IA/neuroforest-master')
-
-def transform(coords, offset, factor) :
-    return (np.array([coord.to_vect() for coord in coords]) + offset) * factor
-
-
 from adfluo import Sample, DatasetLoader
 
 import numpy as np
