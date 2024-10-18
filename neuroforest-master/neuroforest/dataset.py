@@ -1,4 +1,5 @@
 import json
+import pandas as pd
 import os
 import unicodedata
 from csv import DictReader
@@ -14,6 +15,7 @@ from adfluo import Sample, DatasetLoader
 import numpy as np
 
 DATA_FOLDER = Path(__file__).parent.parent.parent /"data_2022"
+DATA_FOLDER_2024 = Path(__file__).parent.parent.parent /"data_2024"
 SESSION_TYPES = {"first", "patchy", "uniform"}
 SessionType = Literal["first", "patchy", "uniform"]
 
@@ -83,7 +85,10 @@ class NeuroForestSample(Sample):
         try :
             self.answers = questionnaire[remove_accents(self.subject_name.lower())]
         except KeyError:
-            self.answers = None
+            try :
+                self.answers = questionnaire[remove_accents(self.subject_name[2:].lower())]
+            except KeyError:
+                self.answers = None
 
     @property
     def id(self) -> Union[str, int]:
@@ -122,9 +127,20 @@ class NeuroForestLoader(DatasetLoader):
         self.folder = folder
         with questionnaire_data_path.open() as q_file:
             dict_reader = DictReader(q_file, delimiter="\t")
-            self.questionnaire = {
-                remove_accents(row["Name"].lower()): row for row in dict_reader
-            }
+            try :
+                self.questionnaire = {
+                    remove_accents(row["Name"].lower()): row for row in dict_reader
+                }
+            except KeyError:
+                df = pd.read_csv(questionnaire_data_path, sep = ";")
+                self.questionnaire = {}
+                for row in df.iterrows():
+                    # convert row to dict
+                    row_dict = dict(row[1])
+                    if row[1].isna().sum() > 0 :
+                        continue
+                    self.questionnaire[remove_accents(row_dict["Name"].lower())] = row_dict
+                
 
     @property
     def all_names(self):
@@ -140,4 +156,8 @@ class NeuroForestLoader(DatasetLoader):
 
 dataloader = NeuroForestLoader(DATA_FOLDER / "trajectories_processed",
                                DATA_FOLDER / "questionnaires/ASRS_Q.csv")
+dataloader_2024 = NeuroForestLoader(DATA_FOLDER_2024 / "trajectories_processed",
+                                 DATA_FOLDER_2024 /"Q_asrs_2024.csv")
+
 print(f"Loading data from : {dataloader.folder}")
+print(f"Loading data from : {dataloader_2024.folder}")
