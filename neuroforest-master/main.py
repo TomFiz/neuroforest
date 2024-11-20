@@ -19,7 +19,7 @@ from adfluo.types import SampleID, FeatureName
 from scipy.spatial import ConvexHull
 
 from neuroforest.dataset import DATA_FOLDER, SESSION_TYPES, Coordinates, TimeStampedCoordinates, NeuroForestSession, \
-    dataloader
+    dataloader, dataloader_2024
 
 ZERO = 1e-10
 
@@ -60,6 +60,20 @@ def calculate_asrs(questionnaire_answers: dict[str, Any]) -> int:
             asrs_columns_count += 1
     assert asrs_columns_count == 18  # sanity check
     return asrs_score
+
+
+def classify_asrs(questionnaire_answers: dict[str, Any]) -> int:
+    thresholds = {}
+    count_grey = 0
+    for column_name, value in questionnaire_answers.items():
+        if column_name.startswith("asrs"):
+            if int(column_name[-1]) in [1,2,3,12,16,18]:
+                threshold = 3
+            else:
+                thresholds = 2
+            if int(value) >= threshold:
+                count_grey += 1
+    return count_grey
 
 
 def to_vect(coordinates: List[Coordinates]) -> np.ndarray:
@@ -516,19 +530,20 @@ if __name__ == '__main__':
 
     session_types = ["uniform","patchy"]
     features = ["asrs"]
-    for session_type in session_types:
-        features = features + [f"{session_type}/performance",
-                    f"{session_type}/player_distance",
-                    f"{session_type}/gathered_mushrooms_distance",
-                    f"{session_type}/player_trajectory",
-                    f"{session_type}/gathered_mushrooms_trajectory",
-                    f"{session_type}/gathered_mushrooms_deltas",
-                    f"{session_type}/player_convex_hull",
-                    f"{session_type}/gathered_mushrooms_convex_hull",
-                    f"{session_type}/first_seen_mushroom_delta",
-                    f"{session_type}/capture_ratio",
-                    f"{session_type}/fracal_frequencies"]
+    # for session_type in session_types:
+    #     features = features + [f"{session_type}/performance",
+    #                 f"{session_type}/player_distance",
+    #                 f"{session_type}/gathered_mushrooms_distance",
+    #                 f"{session_type}/player_trajectory",
+    #                 f"{session_type}/gathered_mushrooms_trajectory",
+    #                 f"{session_type}/gathered_mushrooms_deltas",
+    #                 f"{session_type}/player_convex_hull",
+    #                 f"{session_type}/gathered_mushrooms_convex_hull",
+    #                 f"{session_type}/first_seen_mushroom_delta",
+    #                 f"{session_type}/capture_ratio",
+    #                 f"{session_type}/fracal_frequencies"]
     
+<<<<<<< HEAD
     extractor.extraction_DAG.prune_features(
         keep_only=features)
     subjects = [session.subject_name for session in dataloader]
@@ -536,12 +551,19 @@ if __name__ == '__main__':
     subjects.remove("Estelle")
     
     # print(f"Studying subjects {subjects}")
+=======
+    # extractor.extraction_DAG.prune_features(
+    #     keep_only=features)
+    # subjects = [session.subject_name for session in dataloader]
+    # subjects.remove("Estelle")
+    # # print(f"Studying subjects {subjects}")
+>>>>>>> 34861404cfae89052cf87fd0c8afaf36e886c6ab
 
-    try :
-        loader = SubsetLoader(dataloader, subjects)
-        extracted_features = extractor.extract_to_dict(loader, extraction_order="sample")
-        with open(f'{DATA_FOLDER}/trajectory_features.json', 'w') as json_file:
-            json.dump(extracted_features, json_file, indent=4)
+    # try :
+    #     loader = SubsetLoader(dataloader, subjects)
+    #     extracted_features = extractor.extract_to_dict(loader, extraction_order="sample")
+    #     with open(f'{DATA_FOLDER}/asrs_results.json', 'w') as json_file:
+    #         json.dump(extracted_features, json_file, indent=4)
 
-    except ExtractionError as e :
-        print(f"Error extracting data for subject {subjects} : \n{e}")
+    # except ExtractionError as e :
+    #     print(f"Error extracting data for subject {subjects} : \n{e}")
