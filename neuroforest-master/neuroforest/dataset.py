@@ -8,7 +8,7 @@ from typing import Literal, TypedDict, List, Set, Any, Union, Iterable
 import matplotlib.pyplot as plt
 
 import sys
-sys.path.append('C:/Users/TomFi/Desktop/Cours/Projet IA/neuroforest-master')
+sys.path.append('C:/Users/kupec/OneDrive/Desktop/neuroforest-main/neuroforest-master')
 from adfluo import Sample, DatasetLoader
 
 import numpy as np

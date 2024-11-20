@@ -532,7 +532,9 @@ if __name__ == '__main__':
     extractor.extraction_DAG.prune_features(
         keep_only=features)
     subjects = [session.subject_name for session in dataloader]
+    print(subjects)
     subjects.remove("Estelle")
+    
     # print(f"Studying subjects {subjects}")
 
     try :
