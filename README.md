@@ -12,10 +12,16 @@
 ### Approche paramétrique
 
 Regarder les mushroom in view
-Regarder les paramètres extraits par le NB, puis les mettre dans un MLP / faire du Linear dessus, voire ajouter des paramètres 
+Regarder les paramètres extraits par le NB, puis les mettre dans un MLP / faire du Linear dessus, voire ajouter des paramètres. C'est fait avec les moyennes et variances de 6 paramètres de trajectoire dans le NB extract_explicit_features.
+
+On remarque que sans stratégie de data augmentation, cela semble complexe de ne pas overfit. Le seul moyen d'avoir une loss correcte et donc une bonne précision sur le train était de renormaliser les données, ce que j'ai fait malgré ma réticence initiale (peur de perdre des infos). Finalement, malgré avoir testé plusieurs hyperparamètres, aucun résultat probant sur un set de validation.
+
 
 
 ### Machine Learning
+
+- Utilisation d'un CNN 1D
+- Utilisation d'un CNN "naîf" 2D sur une image de la trajectoire. C'est quelque chose qui est fait dans le cadre de l'analyse temps-fréquence de signaux par exemple.
 
 ## Prédiction de trajectoires
 
