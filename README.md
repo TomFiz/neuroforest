@@ -21,9 +21,9 @@ On remarque que sans stratégie de data augmentation, cela semble complexe de ne
 ### Machine Learning
 
 - Utilisation d'un CNN 1D
-- Utilisation d'un CNN "naîf" 2D sur une image de la trajectoire. C'est quelque chose qui est fait dans le cadre de l'analyse temps-fréquence de signaux par exemple.
+- Utilisation d'un CNN "naïf" 2D sur une image de la trajectoire. C'est quelque chose qui est fait dans le cadre de l'analyse temps-fréquence de signaux par exemple.
 
-## Prédiction de trajectoires
+## Prédiction de trajectoires dans un environnement RL
 
 # Utilisation du code
 
