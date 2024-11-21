@@ -22,6 +22,10 @@ On remarque que sans stratégie de data augmentation, cela semble complexe de ne
 
 - Utilisation d'un CNN 1D
 - Utilisation d'un CNN "naîf" 2D sur une image de la trajectoire. C'est quelque chose qui est fait dans le cadre de l'analyse temps-fréquence de signaux par exemple.
+Pour le CNN 2D, on peut générer plusieurs type d'image, notamment en jouant sur les paramtères suivants :
+- Trajectoire seule
+- Présence ou non de champignons
+- Présence ou non d'indicateurs temporels (timestamps? Gradient de couleur)
 
 ## Prédiction de trajectoires
 
