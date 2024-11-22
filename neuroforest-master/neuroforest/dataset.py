@@ -1,12 +1,18 @@
 import json
+from re import X
 import pandas as pd
 import os
+import torch
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
 import unicodedata
 from csv import DictReader
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, TypedDict, List, Set, Any, Union, Iterable
 import matplotlib.pyplot as plt
+from typing import Optional, List, Tuple, Dict, Iterable
+from PIL import Image
 
 import sys
 sys.path.append('C:/Users/kupec/OneDrive/Desktop/neuroforest-main/neuroforest-master')
@@ -154,6 +160,107 @@ class NeuroForestLoader(DatasetLoader):
             yield NeuroForestSample(self.folder, name, self.questionnaire)
 
 
+class ImageLoader(Dataset):
+    
+    def __init__(self, root_folder: Path, questionnaire_data_path: Path):
+        self.root_folder = root_folder
+        if not self.root_folder.exists():
+            raise FileNotFoundError(f"Le dossier {self.root_folder} n'existe pas.")
+        self.image_files = list(self.root_folder.glob("*.png"))
+        
+        ##Pour les questionnaires
+        with questionnaire_data_path.open() as q_file:
+            dict_reader = DictReader(q_file, delimiter="\t")
+            try:
+                self.questionnaire = {
+                    remove_accents(row["Name"].lower()): row for row in dict_reader
+                }
+            except KeyError:
+                df = pd.read_csv(questionnaire_data_path, sep=";")
+                self.questionnaire = {}
+                for row in df.iterrows():
+                    # convert row to dict
+                    row_dict = dict(row[1])
+                    if row[1].isna().sum() > 0:
+                        continue
+                    self.questionnaire[remove_accents(row_dict["Name"].lower())] = row_dict
+
+        self.transform = transforms.Compose([
+            transforms.Resize((128, 128)),
+            transforms.ToTensor(),
+        ])
+        self.image_categories = self.assign_categories()
+
+    def parse_filename(self, filename: str) -> Dict[str, Optional[str]]:
+        name, _ = filename.split(".")  # Supprimer l'extension
+        parts = name.split("_")
+
+        parsed_data = {
+            "name": remove_accents(parts[0].lower()),  # Normaliser le nom
+            "session_type": parts[1],
+            "no_mushroom": "nomushroom" in parts,  # Boolean
+            "no_timestamp": "notimestamp" in parts,  # Boolean
+        }
+        return parsed_data
+    
+    def get_category(self, idx: int) -> str:
+        image_file = self.image_files[idx]
+        return self.image_categories[image_file]
+
+
+    def __len__(self):
+        return len(self.image_files)
+
+    def __getitem__(self, idx) -> Tuple[torch.Tensor, Dict[str, str]]:
+        image_file = self.image_files[idx]
+        image = Image.open(image_file).convert('RGB')
+        image = self.transform(image)
+        
+        info = self.parse_filename(image_file.name)
+        name = info["name"]
+        label = self.questionnaire.get(name, {})
+        
+        return image, label
+    
+    def get_indices_by_category(self, category: str) -> List[int]:
+        return [
+            idx for idx, file in enumerate(self.image_files)
+            if self.image_categories[file] == category
+        ]
+
+
+    def assign_categories(self) -> Dict[Path, str]:
+        categories = {}
+        for image_file in self.image_files:
+            info = self.parse_filename(image_file.name)
+            if not info["no_mushroom"] and not info["no_timestamp"]:
+                categories[image_file] = "with_mushroom_with_timestamp"
+            elif not info["no_mushroom"] and info["no_timestamp"]:
+                categories[image_file] = "with_mushroom_no_timestamp"
+            elif info["no_mushroom"] and not info["no_timestamp"]:
+                categories[image_file] = "no_mushroom_with_timestamp"
+            elif info["no_mushroom"] and info["no_timestamp"]:
+                categories[image_file] = "no_mushroom_no_timestamp"
+        return categories
+
+    def get_image(self, name: str, session_type: str, no_mushroom: bool = False, no_timestamp: bool = False) -> Optional[Path]:
+        for image_file in self.image_files:
+            info = self.parse_filename(image_file.name)
+            if (
+                info["name"] == name and
+                info["session_type"] == session_type and
+                info["no_mushroom"] == no_mushroom and
+                info["no_timestamp"] == no_timestamp
+            ):
+                return image_file
+        print(f"Aucune image trouvée pour {name} - {session_type} avec no_mushroom={no_mushroom}, no_timestamp={no_timestamp}")
+        return None
+
+    def __iter__(self) -> Iterable[Path]:
+        for image_file in self.image_files:
+            yield image_file
+
+image_loader = ImageLoader(Path(__file__).parent.parent.parent / "images_2022", DATA_FOLDER / "questionnaires/ASRS_Q.csv" )
 dataloader = NeuroForestLoader(DATA_FOLDER / "trajectories_processed",
                                DATA_FOLDER / "questionnaires/ASRS_Q.csv")
 dataloader_2024 = NeuroForestLoader(DATA_FOLDER_2024 / "trajectories_processed",
@@ -161,3 +268,4 @@ dataloader_2024 = NeuroForestLoader(DATA_FOLDER_2024 / "trajectories_processed",
 
 print(f"Loading data from : {dataloader.folder}")
 print(f"Loading data from : {dataloader_2024.folder}")
+print(type(image_loader))
