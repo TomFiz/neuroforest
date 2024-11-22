@@ -543,11 +543,21 @@ if __name__ == '__main__':
     #                 f"{session_type}/capture_ratio",
     #                 f"{session_type}/fracal_frequencies"]
     
+<<<<<<< HEAD
+    extractor.extraction_DAG.prune_features(
+        keep_only=features)
+    subjects = [session.subject_name for session in dataloader]
+    print(subjects)
+    subjects.remove("Estelle")
+    
+    # print(f"Studying subjects {subjects}")
+=======
     # extractor.extraction_DAG.prune_features(
     #     keep_only=features)
     # subjects = [session.subject_name for session in dataloader]
     # subjects.remove("Estelle")
     # # print(f"Studying subjects {subjects}")
+>>>>>>> 34861404cfae89052cf87fd0c8afaf36e886c6ab
 
     # try :
     #     loader = SubsetLoader(dataloader, subjects)
