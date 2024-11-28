@@ -27,6 +27,14 @@ Pour le CNN 2D, on peut générer plusieurs type d'image, notamment en jouant su
 - Présence ou non de champignons
 - Présence ou non d'indicateurs temporels (timestamps? Gradient de couleur)
 
+Conseils de Gianni Franchi:
+- Visualiser en luminance
+- Visualiser des images avec les niveaux extremes de score d'attention, pour motiver le CNN
+- Explication AI pour en savoir plus (explicabilité).
+- Utiliser ResNet 18
+- Penser à des algo de classification de séries temporelles. 
+
+
 ## Prédiction de trajectoires
 
 # Utilisation du code
