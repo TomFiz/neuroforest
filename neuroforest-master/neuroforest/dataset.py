@@ -157,7 +157,7 @@ class NeuroForestLoader(DatasetLoader):
 dataloader = NeuroForestLoader(DATA_FOLDER / "trajectories_processed",
                                DATA_FOLDER / "questionnaires/ASRS_Q.csv")
 dataloader_2024 = NeuroForestLoader(DATA_FOLDER_2024 / "trajectories_processed",
-                                 DATA_FOLDER_2024 /"Q_asrs_2024.csv")
+                                 DATA_FOLDER_2024 /"Q_asrs_2024_complet.csv")
 
 print(f"Loading data from : {dataloader.folder}")
 print(f"Loading data from : {dataloader_2024.folder}")
