@@ -13,6 +13,8 @@ from typing import Literal, TypedDict, List, Set, Any, Union, Iterable
 import matplotlib.pyplot as plt
 from typing import Optional, List, Tuple, Dict, Iterable
 from PIL import Image
+from scipy.spatial import ConvexHull
+
 
 import sys
 sys.path.append('C:/Users/kupec/OneDrive/Desktop/neuroforest-main/neuroforest-master')
@@ -79,6 +81,43 @@ class NeuroForestSession:
         self.gathered_mushrooms = gathered_mushrooms
         self.nb_mushrooms = nb_mushrooms
         self.total_time = total_time
+    
+    def get_mushroom_convex_hull(self):
+        """
+        Calcule l'enveloppe convexe des positions de champignons.
+
+        Returns:
+            hull (ConvexHull): L'objet ConvexHull représentant l'enveloppe convexe.
+            hull_points (ndarray): Les points de l'enveloppe convexe (coordonnées des sommets).
+        """
+        # Récupérer les coordonnées des champignons
+        points = np.array([(c.x, c.y) for c in self.mushroom_coords])
+        
+        if len(points) < 3:
+            raise ValueError("L'enveloppe convexe nécessite au moins trois points.")
+
+        # Calculer l'enveloppe convexe
+        hull = ConvexHull(points)
+        hull_points = points[hull.vertices]
+        return hull, hull_points
+
+    def plot_convex_hull(self):
+        """
+        Trace les positions des champignons et l'enveloppe convexe.
+        """
+        hull, hull_points = self.get_mushroom_convex_hull()
+        points = np.array([(c.x, c.y) for c in self.mushroom_coords])
+        
+        plt.figure(figsize=(8, 6))
+        plt.scatter(points[:, 0], points[:, 1], label="Champignons", alpha=0.6)
+        plt.plot(hull_points[:, 0], hull_points[:, 1], 'r-', label="Enveloppe convexe")
+        plt.fill(hull_points[:, 0], hull_points[:, 1], 'r', alpha=0.2, label="Zone Convexe")
+        plt.legend()
+        plt.title("Enveloppe Convexe des Champignons")
+        plt.xlabel("X")
+        plt.ylabel("Y")
+        plt.show()
+
 
 
 class NeuroForestSample(Sample):
@@ -95,10 +134,16 @@ class NeuroForestSample(Sample):
                 self.answers = questionnaire[remove_accents(self.subject_name[2:].lower())]
             except KeyError:
                 self.answers = None
+        
 
     @property
     def id(self) -> Union[str, int]:
         return self.subject_name
+    
+    @property
+    def num_id(self): #ID numérique consistent avec le questionnaire
+        return self.answers["sujet"] if self.answers is not None else None
+
 
     def load_session(self, session_type: SessionType) -> NeuroForestSession:
         filepath = self.root_folder / f"{self.subject_name}_{session_type}0.json"
