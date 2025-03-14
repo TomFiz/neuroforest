@@ -21,6 +21,22 @@ On remarque que sans stratégie de data augmentation, cela semble complexe de ne
 ### Machine Learning
 
 - Utilisation d'un CNN 1D
+- Utilisation d'un CNN "naîf" 2D sur une image de la trajectoire. C'est quelque chose qui est fait dans le cadre de l'analyse temps-fréquence de signaux par exemple.
+Pour le CNN 2D, on peut générer plusieurs type d'image, notamment en jouant sur les paramtères suivants :
+- Trajectoire seule
+- Présence ou non de champignons
+- Présence ou non d'indicateurs temporels (timestamps? Gradient de couleur)
+
+Conseils de Gianni Franchi:
+- Visualiser en luminance
+- Visualiser des images avec les niveaux extremes de score d'attention, pour motiver le CNN
+- Explication AI pour en savoir plus (explicabilité).
+- Utiliser ResNet 18
+- Penser à des algo de classification de séries temporelles. 
+
+
+## Prédiction de trajectoires
+=======
 - Utilisation d'un CNN "naïf" 2D sur une image de la trajectoire. C'est quelque chose qui est fait dans le cadre de l'analyse temps-fréquence de signaux par exemple.
 
 ## Prédiction de trajectoires dans un environnement RL
