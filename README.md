@@ -36,6 +36,10 @@ Conseils de Gianni Franchi:
 
 
 ## Prédiction de trajectoires
+=======
+- Utilisation d'un CNN "naïf" 2D sur une image de la trajectoire. C'est quelque chose qui est fait dans le cadre de l'analyse temps-fréquence de signaux par exemple.
+
+## Prédiction de trajectoires dans un environnement RL
 
 # Utilisation du code
 
