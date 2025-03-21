@@ -17,7 +17,7 @@ from scipy.spatial import ConvexHull
 
 
 import sys
-sys.path.append('C:/Users/kupec/OneDrive/Desktop/neuroforest-main/neuroforest-master')
+sys.path.append('C:/Users/kupec/OneDrive/Desktop/neuroforest/neuroforest-master')
 from adfluo import Sample, DatasetLoader
 
 import numpy as np
