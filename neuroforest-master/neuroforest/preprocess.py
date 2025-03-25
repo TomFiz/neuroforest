@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append('C:/Users/TomFi/Desktop/Cours/Projet IA/neuroforest-master')
+sys.path.append('C:/Users/kupec/OneDrive/Desktop/neuroforest-main/neuroforest-master')
 from typing import List
 from pathlib import Path
 from tqdm import tqdm
@@ -53,12 +53,12 @@ def preprocess_json(file_path, output_path):
 
 
 def check(year : str, file_name : str):
-    file_path = Path(f"C:/Users/TomFi/Desktop/Cours/Projet IA/data_{year}/trajectories/{file_name}.json")
+    file_path = Path(f"C:/Users/kupec/OneDrive/Desktop/neuroforest-main/data_{year}/trajectories/{file_name}.json")
     output_path = Path(f"{file_path.parent.parent}/trajectories_processed/{file_name}.json")
     preprocess_json(file_path, output_path)
 
 
-folder = Path("C:/Users/TomFi/Desktop/Cours/Projet IA/data_2024/trajectories")
+folder = Path("C:/Users/kupec/OneDrive/Desktop/neuroforest-main/data_2024/trajectories")
 for file in tqdm(folder.glob("*.json")):
     output_path = Path(f"{file.parent.parent}/trajectories_processed/{file.stem}.json")
     if not os.path.exists(output_path):

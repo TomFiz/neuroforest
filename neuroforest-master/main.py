@@ -19,7 +19,7 @@ from adfluo.types import SampleID, FeatureName
 from scipy.spatial import ConvexHull
 
 from neuroforest.dataset import DATA_FOLDER, SESSION_TYPES, Coordinates, TimeStampedCoordinates, NeuroForestSession, \
-    dataloader, dataloader_2024
+    dataloader, dataloader_2024, image_loader
 
 ZERO = 1e-10
 
