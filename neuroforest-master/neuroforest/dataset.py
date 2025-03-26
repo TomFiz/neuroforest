@@ -17,7 +17,6 @@ from scipy.spatial import ConvexHull
 
 
 import sys
-sys.path.append('C:/Users/kupec/OneDrive/Desktop/neuroforest/neuroforest-master')
 from adfluo import Sample, DatasetLoader
 
 import numpy as np
@@ -307,10 +306,9 @@ class ImageLoader(Dataset):
 
 image_loader = ImageLoader(Path(__file__).parent.parent.parent / "images_2022", DATA_FOLDER / "questionnaires/ASRS_Q.csv" )
 dataloader = NeuroForestLoader(DATA_FOLDER / "trajectories_processed",
-                               DATA_FOLDER / "questionnaires/ASRS_Q.csv")
+                            DATA_FOLDER / "questionnaires/ASRS_Q.csv")
 dataloader_2024 = NeuroForestLoader(DATA_FOLDER_2024 / "trajectories_processed",
-                                 DATA_FOLDER_2024 /"Q_asrs_2024.csv")
+                            DATA_FOLDER_2024 /"Q_asrs_2024_complet.csv")
 
 print(f"Loading data from : {dataloader.folder}")
 print(f"Loading data from : {dataloader_2024.folder}")
-print(type(image_loader))
