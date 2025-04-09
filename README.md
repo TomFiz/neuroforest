@@ -57,9 +57,3 @@ This folder contains all the notebooks used in the project.
 12. VAE_EXP.ipynb stores all the experiments done with the VAE directly, such as generation tasks of parameters gridsearch. 
 
 
-
-
-
-# Remarks 
-Subjects "Fred" and "margaux" were deleted due to incomplete data, making dataloader fail when confronted to those profiles.
-
